@@ -12,7 +12,6 @@
     <Folder Include="docs\" />
     <Folder Include="results\" />
     <Folder Include="tests\" />
-    <Folder Include="src\" />
   </ItemGroup>
 
 </Project>

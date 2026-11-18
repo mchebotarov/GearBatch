@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="GearBatch.Tests/GearBatch.Tests.csproj" Id="94714a60-a560-48da-99d0-8f9917062b3c" />
   <Project Path="GearBatch/GearBatch.csproj" />
 </Solution>
