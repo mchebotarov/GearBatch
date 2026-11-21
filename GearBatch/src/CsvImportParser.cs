@@ -5,27 +5,38 @@ using System.Text.RegularExpressions;
 namespace GearBatch.src
 {
     public sealed record ImportRow(
-        string Sku, string ProductName, string Category, int Quantity, decimal UnitCostCad);
+        string Sku,
+        string ProductName,
+        string Category,
+        int Quantity,
+        decimal UnitCostCad
+    );
 
     public sealed record CsvRowError(int LineNumber, string Code);
 
     public sealed record CsvParseResult(
         string? FileError,
         IReadOnlyList<ImportRow> AcceptedRows,
-        IReadOnlyList<CsvRowError> RowErrors);
+        IReadOnlyList<CsvRowError> RowErrors
+    );
 
     public static class CsvImportParser
     {
         private static readonly string[] ExpectedHeader =
         {
-            "sku", "productName", "category", "quantity", "unitCostCad"
+            "sku",
+            "productName",
+            "category",
+            "quantity",
+            "unitCostCad",
         };
 
         private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
         // Match one quoted or unquoted field, followed by a comma or the end of the line.
         private static readonly Regex CsvField = new(
-            """\G(?:"(?<quoted>(?:[^"\r\n]|"")*)"|(?<plain>[^",\r\n]*))(?<comma>,|\z)""");
+            """\G(?:"(?<quoted>(?:[^"\r\n]|"")*)"|(?<plain>[^",\r\n]*))(?<comma>,|\z)"""
+        );
 
         private static readonly Regex SkuFormat = new(@"\A[A-Z0-9][A-Z0-9-]{0,31}\z");
         private static readonly Regex CostFormat = new(@"\A[0-9]+(?:\.[0-9]{1,2})?\z");
@@ -118,9 +129,11 @@ namespace GearBatch.src
                 }
 
                 var quoted = match.Groups["quoted"];
-                fields.Add(quoted.Success
-                    ? quoted.Value.Replace("\"\"", "\"")
-                    : match.Groups["plain"].Value);
+                fields.Add(
+                    quoted.Success
+                        ? quoted.Value.Replace("\"\"", "\"")
+                        : match.Groups["plain"].Value
+                );
 
                 if (match.Groups["comma"].Length == 0)
                 {
@@ -152,17 +165,31 @@ namespace GearBatch.src
             }
 
             var quantityText = fields[3].Trim();
-            if (!quantityText.All(char.IsAsciiDigit) ||
-                !int.TryParse(quantityText, NumberStyles.None, CultureInfo.InvariantCulture, out var quantity) ||
-                quantity > 1_000_000)
+            if (
+                !quantityText.All(char.IsAsciiDigit)
+                || !int.TryParse(
+                    quantityText,
+                    NumberStyles.None,
+                    CultureInfo.InvariantCulture,
+                    out var quantity
+                )
+                || quantity > 1_000_000
+            )
             {
                 return (null, "INVALID_QUANTITY");
             }
 
             var costText = fields[4].Trim();
-            if (!CostFormat.IsMatch(costText) ||
-                !decimal.TryParse(costText, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var cost) ||
-                cost is <= 0 or > 99_999.99m)
+            if (
+                !CostFormat.IsMatch(costText)
+                || !decimal.TryParse(
+                    costText,
+                    NumberStyles.AllowDecimalPoint,
+                    CultureInfo.InvariantCulture,
+                    out var cost
+                )
+                || cost is <= 0 or > 99_999.99m
+            )
             {
                 return (null, "INVALID_UNIT_COST");
             }
