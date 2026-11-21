@@ -86,6 +86,18 @@ public class CsvImportParserTests
         Assert.Empty(result.RowErrors);
     }
 
+    [Fact]
+    public void Parse_RowWithInvalidSkuAndQuantity_ReportsOnlyInvalidSku()
+    {
+        var result = ParseSample("bad sku,Trail Dome 2,Tents,-1,125.00");
+
+        Assert.Null(result.FileError);
+        Assert.Empty(result.AcceptedRows);
+
+        var error = Assert.Single(result.RowErrors);
+        Assert.Equal(new CsvRowError(2, "INVALID_SKU"), error);
+    }
+
     private static CsvParseResult ParseSample(string rows)
     {
         const string header = "sku,productName,category,quantity,unitCostCad";
